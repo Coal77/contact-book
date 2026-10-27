@@ -113,7 +113,7 @@ def search_contacts(container: dict, cntct_name: str) -> str :
         if key.split("_")[0] == cleaned:
             phone = container[key]["phone"]
             email = container[key]["email"] or "no email available"
-            contact_string = f"\n{cleaned} : {phone}, {email}"
+            contact_string = f"{cleaned} : {phone}, {email}"
             matches.append(contact_string)
 
     if not matches:
