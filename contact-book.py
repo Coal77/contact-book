@@ -108,16 +108,18 @@ def search_contacts(container: dict, cntct_name: str) -> str :
     if not container :
         return None, "There are no saved contacts!"
     
-    if cleaned not in container :
-        return None, "Contact not found"
+    for key in container:
+        if cleaned != key.split("_")[0] :
+            return None, "Contact not found"
     
-    phone = container[cleaned]
-    contact = f"\n{cleaned} : {phone}"
+        if key.split("_")[0] == cleaned:
+            phone = container[key]["phone"]
+            contact = f"\n{cleaned} : {phone}"
 
-    return contact, None
+        return contact, None
 
 def edit_contacts(container: dict, old_name: str, new_name: str, new_phone, new_email) :
-    #* Check if their are no saved contacts in the contact book
+    #* Check if there are no saved contacts in the contact book
     if not container :
         return None, "There are no contacts to edit!"
     
