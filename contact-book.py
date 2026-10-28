@@ -71,12 +71,13 @@ def get_valid_input(prompt: str, validate_fn, allow_empty = False) -> str :
         
         print(f"Error! {err}\n")
 
-def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
-    key = f"{cntct_name}_{cntct_no}"
+def generate_id(container: dict) -> str:
+    if not container:
+        return "C001"
+    highest = max(int(contact_id[1:]) for contact_id in container)
+    return f"C{highest + 1:03d}"
 
-    if key in container :
-        return None, f"A contact named {cntct_name} already exists!"
-    
+def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
     for details in container.values() :
         if details["phone"] == cntct_no :
@@ -85,10 +86,15 @@ def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = N
         if cntct_email is not None and details["email"] == cntct_email :
             return None, "This email address is already saved!"
 
-    container[key] = {
-        "phone" : cntct_no,
-        "email" : cntct_email
+    #* Generate id after validation pass
+    id = generate_id(container)
+
+    container[id] = {
+        "name": cntct_name,
+        "phone": cntct_no,
+        "email": cntct_email
     }
+    
     return "Contact added successfully", None
 
 def view_contacts(container: dict) -> str :
