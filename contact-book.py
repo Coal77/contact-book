@@ -94,7 +94,7 @@ def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = N
         "phone": cntct_no,
         "email": cntct_email
     }
-    
+
     return "Contact added successfully", None
 
 def view_contacts(container: dict) -> str :
@@ -102,10 +102,9 @@ def view_contacts(container: dict) -> str :
         return None, "There are no saved contacts!"
     
     items = []
-    for i, (k, v) in enumerate(container.items(), start=1) :
-        name = k.split("_")[0]
+    for i, v in enumerate(container.values(), start=1) :
         show_email = f"Email: {v['email']}" if v['email'] else ""
-        items.append(f"{i}. {name}\nPhone: {v['phone']}\n{show_email}")
+        items.append(f"{i}. {v["name"]}\nPhone: {v['phone']}\n{show_email}")
         
     return "\n".join(items), None
 
