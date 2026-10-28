@@ -73,9 +73,9 @@ def get_valid_input(prompt: str, validate_fn, allow_empty = False) -> str :
 
 def generate_id(container: dict) -> str:
     if not container:
-        return "C001"
+        return "001"
     highest = max(int(contact_id[1:]) for contact_id in container)
-    return f"C{highest + 1:03d}"
+    return f"{highest + 1:03d}"
 
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
@@ -97,25 +97,28 @@ def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = N
 
     return "Contact added successfully", None
 
-def view_contacts(container: dict) -> str :
+def view_contacts(container: dict) -> tuple[str | None, str | None] :
     if not container :
         return None, "There are no saved contacts!"
     
     items = []
-    for i, v in enumerate(container.values(), start=1) :
-        show_email = f"Email: {v['email']}" if v['email'] else ""
-        items.append(f"{i}. {v["name"]}\nPhone: {v['phone']}\n{show_email}")
+    for contact_id, v in container.items() :
+        lines = [f"[{contact_id}]: {v["name"]}", f"Phone: {v['phone']}"]
+        if v["email"] is not None:
+            lines.append(f"Email: {v["email"]}")
+
+        items.append("\n".join(lines))
         
-    return "\n".join(items), None
+    return "\n\n".join(items), None
 
 def search_contacts(container: dict, cntct_name: str) -> str :
-    cleaned = cntct_name.title()
     if not container :
         return None, "There are no saved contacts!"
-    
+
+    cleaned = cntct_name.title()
     matches = []
-    for key in container:
-        if key.split("_")[0] == cleaned:
+    for key in container.keys():
+        if container[key]["name"] == cleaned:
             phone = container[key]["phone"]
             email = container[key]["email"] or "no email available"
             contact_string = f"{cleaned} : {phone}, {email}"
