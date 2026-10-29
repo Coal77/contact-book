@@ -71,6 +71,16 @@ def get_valid_input(prompt: str, validate_fn, allow_empty = False) -> str :
         
         print(f"Error! {err}\n")
 
+def search_by_name(container: dict, name: str) -> dict:
+    target = name.strip().title()
+    results = {}
+
+    for contact_id, dict_val in container.items():
+        if dict_val["name"] == target:
+            results[contact_id] = dict_val
+
+    return results
+
 def generate_id(container: dict) -> str:
     if not container:
         return "001"
@@ -136,7 +146,7 @@ def edit_contacts(container: dict, old_name: str, new_name: str, new_phone, new_
     
     """
         {
-            "Faith_000": {"phone": 000, "email": ""}
+            "001": {"phone": 000, "email": ""}
         }
     """
 
@@ -161,6 +171,25 @@ def edit_contacts(container: dict, old_name: str, new_name: str, new_phone, new_
 
     return container, None
     
+def edit(container: dict, contact_id: str, new_name: str,new_phone: str, new_email: str) -> dict:
+    if not container:
+        return None, "There are no saved contacts to edit"
+
+    #todo Check if it is needed to use a while loop
+    #todo Check about creating a function for different messages
+    if contact_id not in container:
+        return None, ValueError("Please enter a valid id!")
+    
+    #todo Check if it is better to use get valid input to get the new names when appropiate
+    for id in container.keys():
+        if contact_id == id:
+            target = id
+
+            container[target]["name"] = new_name
+            container[target]["phone"] = new_phone
+            container[target]["email"] = new_email
+    
+    return container, None
 
 while True :
     menu()
@@ -199,17 +228,35 @@ while True :
     
     elif user_input == "4" :
 
-        old_name = get_valid_input("Enter contact name to edit contact info: ", sanitize_name)
-        new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
-        new_phone = get_valid_input("Enter new phone: ", sanitize_digit, allow_empty=True)
-        new_email = get_valid_input("Enter new email information: ", sanitize_email)
+        # old_name = get_valid_input("Enter contact name to edit contact info: ", sanitize_name)
+        # new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
+        # new_phone = get_valid_input("Enter new phone: ", sanitize_digit, allow_empty=True)
+        # new_email = get_valid_input("Enter new email information: ", sanitize_email)
 
-        new_name = new_name or None
+        # new_name = new_name or None
 
-        contact, err = edit_contacts(contact_book, old_name, new_name, new_phone, new_email)
+        # contact, err = edit_contacts(contact_book, old_name, new_name, new_phone, new_email)
+
+        #* View all contacts to allow users select by id
+        contacts, err = view_contacts(contact_book)
+        if err is not None :
+            print(f"Error! {err}")
+        else:
+            print(contacts)
+
+        contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
+        new_name = get_valid_input("Enter new name: ", sanitize_name)
+        new_phone = get_valid_input("Enter new phone number: ", sanitize_digit)
+        new_email = get_valid_input("Enter new email: ", sanitize_email)
+
+        result, err = edit(contact_book, contact_id, new_name, new_phone, new_email)
+
 
         if err is not None :
             print(f"Error! {err}")
+        else:
+            contact, _ = view_contacts(contact_book)
+            print(contact)
 
     elif user_input == "6":
         print("Thank you for using our Service")
