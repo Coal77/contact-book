@@ -81,6 +81,15 @@ def search_by_name(container: dict, name: str) -> dict:
 
     return results
 
+def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None):
+    for contact_id, details in container.items():
+        if container[contact_id] == ignore_id:
+            continue
+        if details[field] == value:
+            return True
+
+    return False
+
 def generate_id(container: dict) -> str:
     if not container:
         return "001"
@@ -178,16 +187,33 @@ def edit(container: dict, contact_id: str, new_name: str,new_phone: str, new_ema
     #todo Check if it is needed to use a while loop
     #todo Check about creating a function for different messages
     if contact_id not in container:
-        return None, ValueError("Please enter a valid id!")
+        return None, ValueError("Contact not found!")
     
     #todo Check if it is better to use get valid input to get the new names when appropiate
-    for id in container.keys():
-        if contact_id == id:
-            target = id
+    """
+        001: {
+            "name": Faith,
+            "phone": 081,
+            'email": faith@gmail.com
+        }
+    """
 
-            container[target]["name"] = new_name
-            container[target]["phone"] = new_phone
-            container[target]["email"] = new_email
+    #* Check if user inputs a field and if it's not a duplicate. Name shouldn't be checked cause multiple names are allowed
+    if new_phone is not None and is_duplicate(contact_book, "phone", new_phone, contact_id):
+        return None, "Another contact has this number!"
+    
+    if new_email is not None and is_duplicate(contact_book, "email", new_email, contact_id):
+        return None, "Another contact has this email!"
+
+    if new_name is not None:
+        container[contact_id]["name"] = new_name
+
+    if new_phone is not None:
+        container[contact_id]["phone"] = new_phone
+
+    if new_email is not None:
+        container[contact_id]["email"] = new_email
+
     
     return container, None
 
