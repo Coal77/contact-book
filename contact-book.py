@@ -71,7 +71,7 @@ def get_valid_input(prompt: str, validate_fn, allow_empty = False) -> str :
         
         print(f"Error! {err}\n")
 
-def search_by_name(container: dict, name: str) -> dict:
+def search_by_name(container: dict, name: str) -> tuple[dict | None, str | None]:
     target = name.strip().title()
     results = {}
 
@@ -79,7 +79,10 @@ def search_by_name(container: dict, name: str) -> dict:
         if dict_val["name"] == target:
             results[contact_id] = dict_val
 
-    return results
+    if not results:
+        return None, f"There are no contacts found with the name '{target}'"
+
+    return results, None
 
 def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None):
     for contact_id, details in container.items():
@@ -93,7 +96,7 @@ def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None)
 def generate_id(container: dict) -> str:
     if not container:
         return "001"
-    highest = max(int(contact_id[1:]) for contact_id in container)
+    highest = max(int(contact_id) for contact_id in container)
     return f"{highest + 1:03d}"
 
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
@@ -148,39 +151,7 @@ def search_contacts(container: dict, cntct_name: str) -> str :
 
     return "\n".join(matches), None
 
-def edit_contacts(container: dict, old_name: str, new_name: str, new_phone, new_email) :
-    #* Check if there are no saved contacts in the contact book
-    if not container :
-        return None, "There are no contacts to edit!"
-    
-    """
-        {
-            "001": {"phone": 000, "email": ""}
-        }
-    """
-
-    #* Check if old name has not been saved previously
-    if old_name not in container :
-        return None, "Contacts not found!"
-    
-    if new_name is not None and new_name != old_name :
-        if new_name in container :
-            return None, "You have a contact with this name!"
-        
-        container[new_name] = container.pop(old_name)
-        target_key = new_name
-    else :
-        target_key = old_name
-
-    if new_phone is not None:
-        container[target_key]["phone"] = new_phone
-    
-    if new_email is not None:
-        container[target_key]["email"] = new_email
-
-    return container, None
-    
-def edit(container: dict, contact_id: str, new_name: str,new_phone: str, new_email: str) -> dict:
+def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str, new_email: str) -> dict:
     if not container:
         return None, "There are no saved contacts to edit"
 
@@ -253,30 +224,43 @@ while True :
             print(contact)
     
     elif user_input == "4" :
-
-        # old_name = get_valid_input("Enter contact name to edit contact info: ", sanitize_name)
-        # new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
-        # new_phone = get_valid_input("Enter new phone: ", sanitize_digit, allow_empty=True)
-        # new_email = get_valid_input("Enter new email information: ", sanitize_email)
-
-        # new_name = new_name or None
-
-        # contact, err = edit_contacts(contact_book, old_name, new_name, new_phone, new_email)
-
-        #* View all contacts to allow users select by id
-        contacts, err = view_contacts(contact_book)
+        old_name = get_valid_input("Enter contact name to edit: ", sanitize_name, allow_empty=False)
+        
+        #* Search contacts by name to allow users select by id
+        matches, err = search_by_name(contact_book, old_name)
         if err is not None :
             print(f"Error! {err}")
+            continue
         else:
-            print(contacts)
+            contacts, err = view_contacts(matches)
+            if err:
+                print(f"Error! {err}")
+            else:
+                print(contacts)
 
         contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
-        new_name = get_valid_input("Enter new name: ", sanitize_name)
-        new_phone = get_valid_input("Enter new phone number: ", sanitize_digit)
-        new_email = get_valid_input("Enter new email: ", sanitize_email)
 
-        result, err = edit(contact_book, contact_id, new_name, new_phone, new_email)
+        new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
 
+        while True:
+            new_phone = get_valid_input("Enter new phone number: ", sanitize_digit, allow_empty=True)
+
+            if new_phone and is_duplicate(contact_book, "phone", contact_id):
+                print("Error! This number is already saved!")
+                continue
+
+            break
+
+        while True:
+            new_email = get_valid_input("Enter new email: ", sanitize_email)
+
+            if new_email and is_duplicate(contact_book, "email", contact_id):
+                print("Error! This number is already saved!")
+                continue
+
+            break
+
+        result, err = edit_contacts(contact_book, contact_id, new_name, new_phone, new_email)
 
         if err is not None :
             print(f"Error! {err}")
