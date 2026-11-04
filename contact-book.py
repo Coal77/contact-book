@@ -86,7 +86,7 @@ def search_by_name(container: dict, name: str) -> tuple[dict | None, str | None]
 
 def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None):
     for contact_id, details in container.items():
-        if container[contact_id] == ignore_id:
+        if contact_id == ignore_id:
             continue
         if details[field] == value:
             return True
