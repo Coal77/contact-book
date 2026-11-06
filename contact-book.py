@@ -195,8 +195,21 @@ while True :
     if user_input == "1" :
         contact_name = get_valid_input("Enter Contact name: ", sanitize_name)
         
-        contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
-        contact_email = get_valid_input("Enter Contact email: ", sanitize_email)
+        while True:
+            contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
+
+            if contact_no and is_duplicate(contact_book, "phone", contact_no):
+                print("Error! This number is already saved.")
+                continue
+            break
+        
+        while True:
+            contact_email = get_valid_input("Enter Contact email: ", sanitize_email)
+
+            if contact_email and is_duplicate(contact_book, "email", contact_email):
+                print("Error! Email is already saved.")
+                continue
+            break
 
         contact, err = add_contact(contact_book, contact_name, contact_no, contact_email)
 
