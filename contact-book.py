@@ -88,6 +88,7 @@ def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None)
     for contact_id, details in container.items():
         if contact_id == ignore_id:
             continue
+
         if details[field] == value:
             return True
 
@@ -102,16 +103,16 @@ def generate_id(container: dict) -> str:
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
     for details in container.values() :
-        if details["phone"] == cntct_no :
+        if cntct_no is not None and is_duplicate(details, "phone", cntct_no):
             return None, "This phone number is already saved!"
         
-        if cntct_email is not None and details["email"] == cntct_email :
+        if cntct_email is not None and is_duplicate(details, "email", cntct_email) :
             return None, "This email address is already saved!"
 
     #* Generate id after validation pass
-    id = generate_id(container)
+    contact_id = generate_id(container)
 
-    container[id] = {
+    container[contact_id] = {
         "name": cntct_name,
         "phone": cntct_no,
         "email": cntct_email
@@ -151,7 +152,7 @@ def search_contacts(container: dict, cntct_name: str) -> str :
 
     return "\n".join(matches), None
 
-def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str, new_email: str) -> dict:
+def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str, new_email: str) -> tuple[str | None, str | None]:
     if not container:
         return None, "There are no saved contacts to edit"
 
@@ -170,10 +171,10 @@ def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str
     """
 
     #* Check if user inputs a field and if it's not a duplicate. Name shouldn't be checked cause multiple names are allowed
-    if new_phone is not None and is_duplicate(contact_book, "phone", new_phone, contact_id):
+    if new_phone is not None and is_duplicate(container, "phone", new_phone, contact_id):
         return None, "Another contact has this number!"
     
-    if new_email is not None and is_duplicate(contact_book, "email", new_email, contact_id):
+    if new_email is not None and is_duplicate(container, "email", new_email, contact_id):
         return None, "Another contact has this email!"
 
     if new_name is not None:
@@ -190,7 +191,7 @@ def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str
 
 while True :
     menu()
-    user_input = input("Enter a number to choose operation: ")
+    user_input = get_valid_input("Enter a number to choose operation: ", sanitize_digit)
 
     if user_input == "1" :
         contact_name = get_valid_input("Enter Contact name: ", sanitize_name)
@@ -245,17 +246,18 @@ while True :
         while True:
             new_phone = get_valid_input("Enter new phone number: ", sanitize_digit, allow_empty=True)
 
-            if new_phone and is_duplicate(contact_book, "phone", contact_id):
+            if new_phone and is_duplicate(contact_book, "phone", new_phone, contact_id):
                 print("Error! This number is already saved!")
                 continue
 
             break
 
+
         while True:
             new_email = get_valid_input("Enter new email: ", sanitize_email)
 
-            if new_email and is_duplicate(contact_book, "email", contact_id):
-                print("Error! This number is already saved!")
+            if new_email and is_duplicate(contact_book, "email", new_email, contact_id):
+                print("Error! This email is already saved!")
                 continue
 
             break
