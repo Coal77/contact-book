@@ -102,12 +102,11 @@ def generate_id(container: dict) -> str:
 
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
-    for details in container.values() :
-        if cntct_no is not None and is_duplicate(details, "phone", cntct_no):
-            return None, "This phone number is already saved!"
-        
-        if cntct_email is not None and is_duplicate(details, "email", cntct_email) :
-            return None, "This email address is already saved!"
+    if cntct_no is not None and is_duplicate(container, "phone", cntct_no):
+        return None, "This phone number is already saved!"
+    
+    if cntct_email is not None and is_duplicate(container, "email", cntct_email) :
+        return None, "This email address is already saved!"
 
     #* Generate id after validation pass
     contact_id = generate_id(container)
@@ -195,6 +194,7 @@ while True :
 
     if user_input == "1" :
         contact_name = get_valid_input("Enter Contact name: ", sanitize_name)
+        
         contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
         contact_email = get_valid_input("Enter Contact email: ", sanitize_email)
 
