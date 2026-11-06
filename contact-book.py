@@ -188,6 +188,15 @@ def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str
     
     return container, None
 
+def delete_contacts(container: dict, contact_id: str):
+    if not container:
+        return None, "There are no saved contacts!"
+    
+    if contact_id not in container:
+        return None, "Contact not found!"
+    
+    del container[contact_id]
+
 while True :
     menu()
     user_input = get_valid_input("Enter a number to choose operation: ", sanitize_digit)
@@ -252,7 +261,7 @@ while True :
             else:
                 print(contacts)
 
-        contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
+            contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
 
         new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
 
@@ -280,8 +289,23 @@ while True :
         if err is not None :
             print(f"Error! {err}")
         else:
-            contact, _ = view_contacts(contact_book)
-            print(contact)
+            print("Contact edited successfully!")
+    
+    elif user_input == "5":
+        contact_name = get_valid_input("Enter contact name to delete: ", sanitize_name)
+
+        matches, err = search_by_name(contact_book, contact_name)
+        if err is not None:
+            print(f"Error! {err}")
+        else:
+            contacts, err = view_contacts(matches)
+            if err is not None:
+                print(f"Error! {err}")
+            else:
+                print(contacts)
+
+        contact_id = get_valid_input("Enter contact's id to delete: ", sanitize_digit)
+
 
     elif user_input == "6":
         print("Thank you for using our Service")
