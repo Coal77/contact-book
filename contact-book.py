@@ -197,6 +197,8 @@ def delete_contacts(container: dict, contact_id: str):
     
     del container[contact_id]
 
+    return container, None
+
 while True :
     menu()
     user_input = get_valid_input("Enter a number to choose operation: ", sanitize_digit)
@@ -261,7 +263,13 @@ while True :
             else:
                 print(contacts)
 
-            contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
+            while True:
+                contact_id = get_valid_input("Select contact-id to edit contact's details: ", sanitize_digit)
+
+                if contact_id not in matches:
+                    print("Error! Invalid Id.")
+                    continue
+                break
 
         new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
 
@@ -304,7 +312,21 @@ while True :
             else:
                 print(contacts)
 
-        contact_id = get_valid_input("Enter contact's id to delete: ", sanitize_digit)
+            #* Handle if the choose an id not in matches
+            while True:
+                contact_id = get_valid_input("Select id of contact to delete: ", sanitize_digit)
+                if contact_id not in matches:
+                    print("Error! Invalid Id.")
+                    continue
+
+                break
+
+        contacts, err = delete_contacts(contact_book, contact_id)
+        if err is not None:
+            print(f"Error! {err}")
+        else:
+            print("Contact deleted successfully!");
+
 
 
     elif user_input == "6":
