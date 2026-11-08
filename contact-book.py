@@ -321,11 +321,15 @@ while True :
 
                 break
 
-        contacts, err = delete_contacts(contact_book, contact_id)
-        if err is not None:
-            print(f"Error! {err}")
-        else:
-            print("Contact deleted successfully!");
+            """
+            todo write logic for confirmation if user wants to delete
+            todo check repeating logics in edit and delete and put it in a function
+            """
+            contacts, err = delete_contacts(contact_book, contact_id)
+            if err is not None:
+                print(f"Error! {err}")
+            else:
+                print("Contact deleted successfully!")
 
 
 
