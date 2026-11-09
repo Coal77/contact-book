@@ -27,7 +27,7 @@ You need Python 3 installed on your computer.
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/Coal77/contact-book.git>
    ```
 
 2. Navigate to the project directory:
