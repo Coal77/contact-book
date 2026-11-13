@@ -65,4 +65,3 @@ Enter the corresponding number to perform an operation.
 - Implement permanent storage so contacts remain available after closing the application.
 - Improve contact search and management options.
 - Add more robust email and phone number validation.
-- Implement the delete contact functionality.
