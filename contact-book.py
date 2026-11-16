@@ -94,6 +94,15 @@ def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None)
 
     return False
 
+def validate_options(user_input: str, options: tuple) -> bool:
+    option = user_input.lower().strip()
+    error_message = f"Answer must be {', '.join(options[:-1])}, or {options[-1]}"
+
+    if option not in options:
+        return None, error_message
+
+    return option, None
+
 def generate_id(container: dict) -> str:
     if not container:
         return "001"
@@ -328,7 +337,17 @@ while True :
             todo write logic for confirmation if user wants to delete
             todo check repeating logics in edit and delete and put it in a function
             """
-            contacts, err = delete_contacts(contact_book, contact_id)
+
+            #* Ask for user confirmation
+            message = f"Are you sure you want to delete {contact_book[contact_id]["name"]}.(Y/N)"
+
+            confirmation = get_valid_input(message, validate_options)
+            if confirmation == "y":
+                contacts, err = delete_contacts(contact_book, contact_id)
+            elif confirmation == "n":
+                print("Do something")
+
+            # contacts, err = delete_contacts(contact_book, contact_id)
             if err is not None:
                 print(f"Error! {err}")
             else:
