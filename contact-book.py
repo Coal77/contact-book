@@ -137,13 +137,14 @@ def search_contacts(container: dict, cntct_name: str) -> str :
     if not container :
         return None, "There are no saved contacts!"
 
-    cleaned = cntct_name.title()
+    cleaned = cntct_name.strip().title()
     matches = []
     for key in container.keys():
-        if container[key]["name"] == cleaned:
+        if container[key]["name"].startswith(cleaned):
+            name = container[key]["name"]
             phone = container[key]["phone"]
             email = container[key]["email"] or "no email available"
-            contact_string = f"{cleaned} : {phone}, {email}"
+            contact_string = f"{name} : {phone}, {email}"
             matches.append(contact_string)
 
     if not matches:
@@ -230,7 +231,7 @@ while True :
             print("Contact added successfully!")
 
     elif user_input == "2" :
-        print("===Contacts===")
+        print("\n===Contacts===")
 
         contacts, err = view_contacts(contact_book)
 
@@ -240,6 +241,8 @@ while True :
             print(contacts)
 
     elif user_input == "3" :
+        print("\n===Contacts===")
+
         contact_search = get_valid_input("Enter contact name to search: ", sanitize_name)
 
         contact, err = search_contacts(contact_book, contact_search)
