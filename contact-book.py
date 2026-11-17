@@ -57,14 +57,17 @@ def sanitize_email(user_in: str) :
     
     return cleaned, None
 
-def get_valid_input(prompt: str, validate_fn, allow_empty = False) -> str :
+def get_valid_input(prompt: str, validate_fn, allow_empty = False, options = None) -> str | None :
     while True :
         user_input = input(prompt)
         
         if allow_empty and not user_input.strip() :
             return None
         
-        value, err = validate_fn(user_input)
+        if options is not None:
+            value, err = validate_fn(user_input, options)
+        else:
+            value, err = validate_fn(user_input)
 
         if err is None :
             return value
@@ -84,7 +87,7 @@ def search_by_name(container: dict, name: str) -> tuple[dict | None, str | None]
 
     return results, None
 
-def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None):
+def is_duplicate(container: dict, field: str, value: str, ignore_id: str | None = None):
     for contact_id, details in container.items():
         if contact_id == ignore_id:
             continue
@@ -94,7 +97,7 @@ def is_duplicate(container: dict, field: str, value: str, ignore_id: str = None)
 
     return False
 
-def validate_options(user_input: str, options: tuple) -> bool:
+def validate_options(user_input: str, options: tuple) -> tuple[str | None, str | None]:
     option = user_input.lower().strip()
     error_message = f"Answer must be {', '.join(options[:-1])}, or {options[-1]}"
 
@@ -142,7 +145,7 @@ def view_contacts(container: dict) -> tuple[str | None, str | None] :
         
     return "\n\n".join(items), None
 
-def search_contacts(container: dict, cntct_name: str) -> str :
+def search_contacts(container: dict, cntct_name: str) -> tuple[str | None, str | None] :
     if not container :
         return None, "There are no saved contacts!"
 
@@ -168,7 +171,7 @@ def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str
     #todo Check if it is needed to use a while loop
     #todo Check about creating a function for different messages
     if contact_id not in container:
-        return None, ValueError("Contact not found!")
+        return None, "Contact not found!"
     
     #todo Check if it is better to use get valid input to get the new names when appropiate
     """
@@ -196,7 +199,7 @@ def edit_contacts(container: dict, contact_id: str, new_name: str,new_phone: str
         container[contact_id]["email"] = new_email
 
     
-    return container, None
+    return "Contact has been edited successfully", None
 
 def delete_contacts(container: dict, contact_id: str):
     if not container:
@@ -207,17 +210,26 @@ def delete_contacts(container: dict, contact_id: str):
     
     del container[contact_id]
 
-    return container, None
+    return "Contact has been deleted successfully", None
 
 while True :
     menu()
     user_input = get_valid_input("Enter a number to choose operation: ", sanitize_digit)
 
     if user_input == "1" :
-        contact_name = get_valid_input("Enter Contact name: ", sanitize_name)
+        while True:
+            contact_name = get_valid_input("Enter Contact name: ", sanitize_name)
+            if contact_name is None:
+                print("Error! Name is required.")
+                continue
+            break
         
         while True:
             contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
+            if contact_no is None:
+                print("Error! Name is required.")
+                continue
+            break
 
             if contact_no and is_duplicate(contact_book, "phone", contact_no):
                 print("Error! This number is already saved.")
@@ -254,11 +266,14 @@ while True :
 
         contact_search = get_valid_input("Enter contact name to search: ", sanitize_name)
 
-        contact, err = search_contacts(contact_book, contact_search)
-        if err is not None :
-            print(f"\nError! {err}")
-        else :
-            print(contact)
+        if contact_search is None:
+            print("\nNo name entered.")
+        else:
+            contact, err = search_contacts(contact_book, contact_search)
+            if err is not None :
+                print(f"\nError! {err}")
+            else :
+                print(contact)
     
     elif user_input == "4" :
         old_name = get_valid_input("Enter contact name to edit: ", sanitize_name, allow_empty=False)
@@ -339,19 +354,19 @@ while True :
             """
 
             #* Ask for user confirmation
-            message = f"Are you sure you want to delete {contact_book[contact_id]["name"]}.(Y/N)"
+            message = f"Are you sure you want to delete {contact_book[contact_id]["name"]}.(Y/N): "
 
-            confirmation = get_valid_input(message, validate_options)
+            confirmation = get_valid_input(message, validate_options, options=("y", "n"))
             if confirmation == "y":
-                contacts, err = delete_contacts(contact_book, contact_id)
-            elif confirmation == "n":
-                print("Do something")
+                success_message, err = delete_contacts(contact_book, contact_id)
 
-            # contacts, err = delete_contacts(contact_book, contact_id)
-            if err is not None:
-                print(f"Error! {err}")
-            else:
-                print("Contact deleted successfully!")
+                if err is not None:
+                    print(f"Error! {err}")
+                else:
+                    print(success_message)
+            elif confirmation == "n":
+                print("Delete Cancelled.")
+            
 
 
 
