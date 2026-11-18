@@ -136,7 +136,7 @@ def view_contacts(container: dict) -> tuple[str | None, str | None] :
         return None, "There are no saved contacts!"
     
     items = []
-    for contact_id, v in container.items() :
+    for contact_id, v in sorted(container.items(), key=lambda item: item[1]["name"].lower()) :
         lines = [f"[{contact_id}]: {v["name"]}", f"Phone: {v['phone']}"]
         if v["email"] is not None:
             lines.append(f"Email: {v["email"]}")
@@ -226,10 +226,6 @@ while True :
         
         while True:
             contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
-            if contact_no is None:
-                print("Error! Name is required.")
-                continue
-            break
 
             if contact_no and is_duplicate(contact_book, "phone", contact_no):
                 print("Error! This number is already saved.")
