@@ -112,6 +112,20 @@ def generate_id(container: dict) -> str:
     highest = max(int(contact_id) for contact_id in container)
     return f"{highest + 1:03d}"
 
+def validate_phone(user_input: str):
+    user_input = user_input.strip()
+
+    if len(user_input) < 10 or len(user_input) > 14:
+        return None, "Invalid contact length!"
+
+    if user_input.startswith("+234"):
+        raw_phone = user_input.split("+234", 1)[1]
+    elif user_input.startswith("234"):
+        raw_phone = user_input.split("234", 1)[1]
+    elif user_input.startswith("0"):
+        raw_phone = user_input.split("0", 1)[1]
+
+
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
     if cntct_no is not None and is_duplicate(container, "phone", cntct_no):
