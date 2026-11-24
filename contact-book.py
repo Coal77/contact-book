@@ -115,16 +115,28 @@ def generate_id(container: dict) -> str:
 def validate_phone(user_input: str):
     user_input = user_input.strip()
 
-    if len(user_input) < 10 or len(user_input) > 14:
-        return None, "Invalid contact length!"
-
     if user_input.startswith("+234"):
-        raw_phone = user_input.split("+234", 1)[1]
+        raw_phone = user_input[4:]
     elif user_input.startswith("234"):
-        raw_phone = user_input.split("234", 1)[1]
+        raw_phone = user_input[3:]
     elif user_input.startswith("0"):
-        raw_phone = user_input.split("0", 1)[1]
+        raw_phone = user_input[1:]
+    else:
+        return None, "Please input a phone no with valid length"
 
+    processed_phone, err = sanitize_digit(raw_phone)
+    if err is not None:
+        return None, err
+
+    if len(processed_phone) != 10:
+        return None, "Phone number must contain 10 digits after the country code."
+    
+    allowed_prefix = [ "70", "80", "90", "71", "81", "91" ]
+
+    if processed_phone[:2] not in allowed_prefix:
+        return None, "Please input a valid phone number."
+
+    return processed_phone, None
 
 def add_contact(container: dict, cntct_name: str, cntct_no: str, cntct_email = None) :
     #* Handle duplicate contact information 
@@ -239,7 +251,7 @@ while True :
             break
         
         while True:
-            contact_no = get_valid_input("Enter Contact No: ", sanitize_digit)
+            contact_no = get_valid_input("Enter Contact No: ", validate_phone)
 
             if contact_no and is_duplicate(contact_book, "phone", contact_no):
                 print("Error! This number is already saved.")
@@ -311,7 +323,7 @@ while True :
         new_name = get_valid_input("Enter new name: ", sanitize_name, allow_empty=True)
 
         while True:
-            new_phone = get_valid_input("Enter new phone number: ", sanitize_digit, allow_empty=True)
+            new_phone = get_valid_input("Enter new phone number: ", validate_phone, allow_empty=True)
 
             if new_phone and is_duplicate(contact_book, "phone", new_phone, contact_id):
                 print("Error! This number is already saved!")
